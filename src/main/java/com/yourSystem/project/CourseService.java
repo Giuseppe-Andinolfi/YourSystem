@@ -1,5 +1,9 @@
 package com.yourSystem.project;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 import java.io.IOException;
 import java.io.FileOutputStream;
@@ -7,9 +11,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
-
-import com.yourSystem.project.Course;
 
 @Service
 public class CourseService {
@@ -25,7 +26,8 @@ public class CourseService {
     }
 
     public Course getCourseById(Long id) {
-        return courseRepository.findById(id).orElse(null);
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
     }
 
     public List<Course> getAllCourses() {
@@ -46,7 +48,7 @@ public class CourseService {
         courseRepository.deleteById(id);
     }
 
-    public void exportToExcel() throws IOException {
+    public Workbook exportToExcel() throws IOException {
         List<Course> courses = courseRepository.findAll();
 
         // Create a new Excel workbook
@@ -78,5 +80,7 @@ public class CourseService {
         FileOutputStream fileOut = new FileOutputStream("courses.xlsx");
         workbook.write(fileOut);
         fileOut.close();
+        return workbook;
     }
 }
+
